@@ -1,15 +1,39 @@
 import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 
 const baseUrl = "http://127.0.0.1:8787";
 const groups = new Map();
 const cases = [];
 const wranglerBin = "node";
 const wranglerArgs = ["node_modules/wrangler/bin/wrangler.js", "dev", "--local", "--port", "8787"];
+const supportEmail = "sidcraigau@gmail.com";
+const forbiddenPhrases = [/ChatGPT should use/i, /When ChatGPT should use it/i];
+const frozenTools = ["extract_incident_timeline", "extract_postmortem_actions", "check_postmortem_completeness"];
+const pageFiles = [
+  { path: "src/pages/home.html", route: "/", title: "Incident Postmortem Checker", sections: ["What this app does", "When to use this app", "What input it accepts", "What output it returns", "Available tools", "MCP endpoint", "What this app does not do", "Data handling", "Support"] },
+  { path: "src/pages/privacy.html", route: "/privacy", title: "Privacy Policy", sections: ["Data collected", "How input is used", "How output is generated", "Retention", "External sharing", "External API policy", "Account and login policy", "User controls", "Read-only boundary", "Contact", "Last updated"] },
+  { path: "src/pages/terms.html", route: "/terms", title: "Terms of Service", sections: ["Service description", "Allowed use", "User responsibility", "Limitations", "No external execution", "No professional advice", "No destructive actions", "No guarantees", "Prohibited use", "Changes to service", "Contact", "Last updated"] },
+  { path: "src/pages/support.html", route: "/support", title: "Support", sections: ["Support email", "What to include", "Sensitive information warning", "Support scope", "Non-support scope", "Data and privacy questions", "App boundary reminder", "Available tools"] }
+];
 
 function addCase(group, name, fn) {
   groups.set(group, true);
   cases.push({ group, name, fn });
+}
+
+function readPageFile(filePath) {
+  assert.equal(existsSync(filePath), true, `${filePath} should exist`);
+  return readFileSync(filePath, "utf8");
+}
+
+function assertIncludesAll(body, expectedItems) {
+  for (const item of expectedItems) assert.match(body, new RegExp(item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+}
+
+function navigationLabels(body) {
+  const nav = body.match(/<nav aria-label="Primary">([\s\S]*?)<\/nav>/)?.[1] ?? "";
+  return [...nav.matchAll(/<a href="[^"]+"(?: aria-current="page")?>(Home|Privacy|Terms|Support)<\/a>/g)].map((match) => match[1]);
 }
 
 function startWorker() {
@@ -182,16 +206,80 @@ Timeline:
 Follow-up actions:
 - Add cache-rule validation to the deployment pipeline. Owner: Maya. Due: 2026-08-01.`;
 
+for (const page of pageFiles) {
+  addCase("page files", `${page.path} exists and is a complete HTML document`, async () => {
+    const body = readPageFile(page.path);
+    assert.match(body, /^<!doctype html>/i);
+    assert.match(body, /<html lang="en">/);
+    assert.match(body, /<meta charset="utf-8">/);
+    assert.match(body, /<meta name="description" content="[^"]+">/);
+    assert.match(body, new RegExp(`<title>[^<]*${page.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    assert.match(body, /<main>/);
+    assert.match(body, /<section>/);
+    assertIncludesAll(body, ["Incident Postmortem Checker", supportEmail]);
+    assert.deepEqual(navigationLabels(body), ["Home", "Privacy", "Terms", "Support"]);
+  });
+
+  addCase("page content", `${page.title} contains required sections`, async () => {
+    const body = readPageFile(page.path);
+    assertIncludesAll(body, page.sections);
+  });
+
+  addCase("page safety", `${page.path} excludes forbidden phrases and false execution claims`, async () => {
+    const body = readPageFile(page.path);
+    for (const phrase of forbiddenPhrases) assert.doesNotMatch(body, phrase);
+    assert.doesNotMatch(body, /approved by OpenAI|auto(?:matically)? monitors incidents|auto(?:matically)? contacts teams|auto(?:matically)? updates tickets|auto(?:matically)? executes fixes/i);
+  });
+}
+
+addCase("page content", "home page contains endpoint, tools, data handling, and support", async () => {
+  const body = readPageFile("src/pages/home.html");
+  assertIncludesAll(body, [
+    "Organizes explicitly stated incident timelines and follow-up actions, and checks postmortem completeness using only the material supplied by the user.",
+    "POST /mcp",
+    "Data handling",
+    "Support",
+    ...frozenTools
+  ]);
+});
+
+addCase("page content", "support page contains mailto link and sensitive information warning", async () => {
+  const body = readPageFile("src/pages/support.html");
+  assert.match(body, new RegExp(`mailto:${supportEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+  assert.match(body, /Do not send passwords, API keys, access tokens, or unrelated sensitive information\./);
+});
+
+addCase("page consistency", "all page files use consistent app name, email, navigation, and tool spelling", async () => {
+  for (const page of pageFiles) {
+    const body = readPageFile(page.path);
+    assert.match(body, /Incident Postmortem Checker/);
+    assert.match(body, new RegExp(supportEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.deepEqual(navigationLabels(body), ["Home", "Privacy", "Terms", "Support"]);
+  }
+  const allPages = pageFiles.map((page) => readPageFile(page.path)).join("\n");
+  for (const tool of frozenTools) assert.match(allPages, new RegExp(tool, "g"));
+  assert.doesNotMatch(allPages, /assigns tasks|contacts action owners|updates incident systems|runs remediation commands/i);
+});
+
+addCase("page safety", "README and independent HTML files exclude forbidden phrases", async () => {
+  const bodies = [readFileSync("README.md", "utf8"), ...pageFiles.map((page) => readPageFile(page.path))];
+  for (const body of bodies) {
+    for (const phrase of forbiddenPhrases) assert.doesNotMatch(body, phrase);
+  }
+});
+
 addCase("routes", "GET / returns the app page", async () => {
   const response = await fetch(`${baseUrl}/`);
   assert.equal(response.status, 200);
-  assert.match(await response.text(), /Incident Postmortem Checker/);
+  const body = await response.text();
+  assert.match(body, /Incident Postmortem Checker/);
+  assert.match(body, /What this app does/);
 });
 
 for (const [path, expectedText] of [
   ["/privacy", "Privacy Policy"],
   ["/terms", "Terms of Service"],
-  ["/support", "Support Email: sidcraigau@gmail.com"]
+  ["/support", "Support Email:"]
 ]) {
   addCase("routes", `GET ${path} returns review shell page`, async () => {
     const response = await fetch(`${baseUrl}${path}`);
@@ -201,6 +289,12 @@ for (const [path, expectedText] of [
     assert.doesNotMatch(body, /chatgpt should use/i);
   });
 }
+
+addCase("routes", "GET /mcp returns method not allowed", async () => {
+  const response = await fetch(`${baseUrl}/mcp`);
+  assert.equal(response.status, 405);
+  assert.deepEqual(await response.json(), { error: "method_not_allowed", message: "POST /mcp is required." });
+});
 
 addCase("routes", "GET challenge returns exact plain text test token", async () => {
   const response = await fetch(`${baseUrl}/.well-known/openai-apps-challenge`);

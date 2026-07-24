@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incident Postmortem Checker</title>
+  <meta name="description" content="Incident Postmortem Checker organizes explicitly stated incident timelines and follow-up actions, and checks postmortem completeness using supplied text.">
+  <style>
+    :root { color-scheme: light; --ink: #172026; --muted: #52616b; --line: #d8ded8; --paper: #fbfbf8; --accent: #1f6f68; --soft: #eef4f1; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: var(--ink); background: var(--paper); }
+    header, main, footer { width: min(1040px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 24px 0 10px; border-bottom: 1px solid var(--line); }
+    nav { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+    nav a { color: var(--accent); font-weight: 650; text-decoration: none; }
+    nav a[aria-current="page"] { color: var(--ink); border-bottom: 2px solid var(--ink); }
+    main { padding: 42px 0 48px; }
+    h1 { font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1.08; margin: 0 0 16px; letter-spacing: 0; }
+    h2 { font-size: 1.15rem; margin: 0 0 10px; }
+    p, li { color: var(--muted); line-height: 1.6; }
+    .intro { max-width: 780px; font-size: 1.12rem; }
+    .meta { background: var(--soft); border: 1px solid var(--line); padding: 16px; border-radius: 6px; margin: 26px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-top: 28px; }
+    section { border-top: 1px solid var(--line); padding-top: 18px; }
+    code { color: var(--ink); background: var(--soft); padding: 2px 5px; border-radius: 4px; }
+    ul { padding-left: 20px; }
+    footer { border-top: 1px solid var(--line); padding: 20px 0 34px; color: var(--muted); font-size: 0.94rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Primary">
+      <a href="/" aria-current="page">Home</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/support">Support</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Incident Postmortem Checker</h1>
+    <p class="intro">Organizes explicitly stated incident timelines and follow-up actions, and checks postmortem completeness using only the material supplied by the user.</p>
+    <div class="meta">
+      <p><strong>Website:</strong> https://incident-postmortem-checker.sidcraigau.workers.dev</p>
+      <p><strong>MCP Endpoint:</strong> POST https://incident-postmortem-checker.sidcraigau.workers.dev/mcp</p>
+      <p><strong>Support Email:</strong> <a href="mailto:sidcraigau@gmail.com">sidcraigau@gmail.com</a></p>
+    </div>
+    <div class="grid">
+      <section>
+        <h2>What this app does</h2>
+        <ul>
+          <li>Extracts explicitly written incident timeline events.</li>
+          <li>Extracts explicitly written follow-up action items.</li>
+          <li>Checks postmortem completeness against checklist requirements supplied by the user.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>When to use this app</h2>
+        <ul>
+          <li>Organizing existing incident postmortem material.</li>
+          <li>Extracting a timeline from postmortem text.</li>
+          <li>Extracting action, owner, and due date details from supplied notes.</li>
+          <li>Checking whether supplied material is missing explicit checklist items.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>What input it accepts</h2>
+        <ul>
+          <li>Incident postmortems.</li>
+          <li>Incident timelines.</li>
+          <li>Follow-up action notes.</li>
+          <li>Completeness checklists.</li>
+          <li>Related text supplied by the user.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>What output it returns</h2>
+        <ul>
+          <li>Structured timeline events.</li>
+          <li>Structured action lists.</li>
+          <li>Checks showing covered, missing, or partially covered items.</li>
+          <li>Source evidence or error information tied to the result.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Available tools</h2>
+        <ul>
+          <li><code>extract_incident_timeline</code>: extracts explicit incident events and impact statements.</li>
+          <li><code>extract_postmortem_actions</code>: extracts explicit follow-up actions, owners, deadlines, and evidence.</li>
+          <li><code>check_postmortem_completeness</code>: checks supplied postmortem text against supplied requirements.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>MCP endpoint</h2>
+        <p>Use <code>POST /mcp</code> for JSON-RPC MCP requests.</p>
+      </section>
+      <section>
+        <h2>What this app does not do</h2>
+        <ul>
+          <li>Does not access external incident management systems.</li>
+          <li>Does not investigate incidents or infer unstated facts.</li>
+          <li>Does not execute fixes or remediation.</li>
+          <li>Does not contact action owners.</li>
+          <li>Does not modify or publish postmortems.</li>
+          <li>Does not guarantee that postmortem content is true or complete in the real world.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Data handling</h2>
+        <p>Input is used to process the current request. See the <a href="/privacy">Privacy Policy</a> for more detail.</p>
+      </section>
+      <section>
+        <h2>Support</h2>
+        <p>Contact <a href="mailto:sidcraigau@gmail.com">sidcraigau@gmail.com</a> or visit the <a href="/support">Support</a> page.</p>
+      </section>
+    </div>
+  </main>
+  <footer>Incident Postmortem Checker. Read-only incident review support.</footer>
+</body>
+</html>

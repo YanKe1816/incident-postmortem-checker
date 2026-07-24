@@ -25,8 +25,8 @@ function assertErrorResult(result, expectedKeys) {
 
 await mkdir(tempDir, { recursive: true });
 const source = (await readFile(sourcePath, "utf8")).replace(
-  'import { renderHomePage, renderPrivacyPage, renderSupportPage, renderTermsPage } from "./pages/review";',
-  'const renderHomePage = () => ""; const renderPrivacyPage = () => ""; const renderSupportPage = () => ""; const renderTermsPage = () => "";'
+  /import .* from "\.\/pages\/.*\.html";\n/g,
+  ""
 );
 const transpiled = ts.transpileModule(source, {
   compilerOptions: {

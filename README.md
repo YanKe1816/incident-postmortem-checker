@@ -22,6 +22,7 @@ Do not use temporary tunnel URLs as production URLs.
 - Cloudflare Workers
 - TypeScript
 - JSON-RPC 2.0 MCP endpoint at `POST /mcp`
+- Public review pages are maintained as independent HTML source files in `src/pages/*.html`
 - No login, OAuth, database, external API, or external write behavior
 
 ## Public Routes
@@ -69,6 +70,7 @@ npm run test:internal
 ```
 
 `npm run test:mcp:local` starts a local Worker with Wrangler and sends real HTTP requests through the public routes and `POST /mcp`.
+It also verifies the independent page source files exist and contain the required review-page sections.
 
 `npm run test:internal` is a non-HTTP unit test for internal exception wrapping only.
 

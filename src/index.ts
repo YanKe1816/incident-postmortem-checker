@@ -1,9 +1,13 @@
-import { renderHomePage, renderPrivacyPage, renderSupportPage, renderTermsPage } from "./pages/review";
+import homePageHtml from "./pages/home.html";
+import privacyPageHtml from "./pages/privacy.html";
+import supportPageHtml from "./pages/support.html";
+import termsPageHtml from "./pages/terms.html";
 
 const SERVICE_NAME = "incident-postmortem-checker";
 const VERSION = "1.0.0";
 const PROTOCOL_VERSION = "2024-11-05";
 const CHALLENGE_TOKEN = "test";
+const HTML_HEADERS = { "content-type": "text/html; charset=utf-8" };
 
 type JsonRpcId = string | number | null;
 type JsonObject = Record<string, unknown>;
@@ -619,16 +623,16 @@ export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/") {
-      return new Response(renderHomePage(), { headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(homePageHtml, { headers: HTML_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/privacy") {
-      return new Response(renderPrivacyPage(), { headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(privacyPageHtml, { headers: HTML_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/terms") {
-      return new Response(renderTermsPage(), { headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(termsPageHtml, { headers: HTML_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/support") {
-      return new Response(renderSupportPage(), { headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(supportPageHtml, { headers: HTML_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/.well-known/openai-apps-challenge") {
       return new Response(CHALLENGE_TOKEN, { headers: { "content-type": "text/plain; charset=utf-8" } });
