@@ -1,0 +1,17 @@
+{
+  "name": "incident-postmortem-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit",
+    "dev": "node node_modules/wrangler/bin/wrangler.js dev --local --port 8787",
+    "test:mcp:local": "node tests/mcp-local.test.mjs",
+    "test:internal": "node tests/internal-error-unit.test.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260724.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.26.0"
+  }
+}
