@@ -12,8 +12,8 @@ Incident Postmortem Checker is a read-only, stateless Cloudflare Workers MCP app
 
 Formal production URLs are recorded after Cloudflare deployment:
 
-- Website URL: pending deployment
-- MCP URL: pending deployment
+- Website URL: `https://incident-postmortem-checker.sidcraigau.workers.dev`
+- MCP URL: `https://incident-postmortem-checker.sidcraigau.workers.dev/mcp`
 
 Do not use temporary tunnel URLs as production URLs.
 
