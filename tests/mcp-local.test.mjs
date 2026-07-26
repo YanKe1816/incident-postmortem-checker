@@ -316,6 +316,14 @@ addCase("routes", "review pages do not include forbidden phrase", async () => {
   }
 });
 
+addCase("routes", "review routes are served from matching independent HTML files", async () => {
+  for (const page of pageFiles) {
+    const response = await fetch(`${baseUrl}${page.route}`);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), readPageFile(page.path));
+  }
+});
+
 addCase("routes", "GET /health returns stable service status", async () => {
   const response = await fetch(`${baseUrl}/health`);
   assert.deepEqual(await response.json(), { status: "ok", service: "incident-postmortem-checker", version: "1.0.0" });

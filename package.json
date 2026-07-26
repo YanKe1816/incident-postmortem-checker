@@ -7,6 +7,7 @@
     "typecheck": "node node_modules/typescript/bin/tsc --noEmit",
     "dev": "node node_modules/wrangler/bin/wrangler.js dev --local --port 8787",
     "test:mcp:local": "node tests/mcp-local.test.mjs",
+    "test:mcp:production": "node tests/mcp-production.test.mjs",
     "test:internal": "node tests/internal-error-unit.test.mjs"
   },
   "devDependencies": {
