@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "incident-postmortem-checker",
   "main": "src/index.ts",
+  "keep_vars": true,
   "compatibility_date": "2026-07-24",
   "rules": [
     {
