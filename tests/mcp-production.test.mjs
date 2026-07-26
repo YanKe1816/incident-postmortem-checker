@@ -56,7 +56,9 @@ addCase("production pages", "review pages, health, and challenge are reachable",
   const challenge = await fetch(`${baseUrl}/.well-known/openai-apps-challenge`);
   assert.equal(challenge.status, 200);
   assert.match(challenge.headers.get("content-type") ?? "", /^text\/plain;\s*charset=utf-8/i);
-  assert.equal(await challenge.text(), "test");
+  const challengeBody = await challenge.text();
+  assert.notEqual(challengeBody, "test");
+  assert.ok(challengeBody.length > 0);
 });
 
 addCase("production routes", "GET /mcp and unknown route preserve expected status", async () => {

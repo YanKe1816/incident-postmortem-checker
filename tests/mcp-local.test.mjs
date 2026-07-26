@@ -6,7 +6,16 @@ const baseUrl = "http://127.0.0.1:8787";
 const groups = new Map();
 const cases = [];
 const wranglerBin = "node";
-const wranglerArgs = ["node_modules/wrangler/bin/wrangler.js", "dev", "--local", "--port", "8787"];
+const localChallengeToken = "local-placeholder-challenge-token";
+const wranglerArgs = [
+  "node_modules/wrangler/bin/wrangler.js",
+  "dev",
+  "--local",
+  "--port",
+  "8787",
+  "--var",
+  `OPENAI_APPS_CHALLENGE:${localChallengeToken}`
+];
 const supportEmail = "sidcraigau@gmail.com";
 const forbiddenPhrases = [/ChatGPT should use/i, /When ChatGPT should use it/i];
 const frozenTools = ["extract_incident_timeline", "extract_postmortem_actions", "check_postmortem_completeness"];
@@ -296,11 +305,11 @@ addCase("routes", "GET /mcp returns method not allowed", async () => {
   assert.deepEqual(await response.json(), { error: "method_not_allowed", message: "POST /mcp is required." });
 });
 
-addCase("routes", "GET challenge returns exact plain text test token", async () => {
+addCase("routes", "GET challenge returns exact plain text configured token", async () => {
   const response = await fetch(`${baseUrl}/.well-known/openai-apps-challenge`);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/plain;\s*charset=utf-8/i);
-  assert.equal(await response.text(), "test");
+  assert.equal(await response.text(), localChallengeToken);
 });
 
 addCase("routes", "unknown page returns 404", async () => {

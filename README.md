@@ -34,10 +34,10 @@ Do not use temporary tunnel URLs as production URLs.
 | GET | `/terms` | Terms of Service |
 | GET | `/support` | Support |
 | GET | `/health` | Machine-readable health status |
-| GET | `/.well-known/openai-apps-challenge` | Temporary challenge value |
+| GET | `/.well-known/openai-apps-challenge` | Plain-text challenge value from `OPENAI_APPS_CHALLENGE` |
 | POST | `/mcp` | MCP JSON-RPC endpoint |
 
-The current challenge response is the temporary text value `test`. Replace it with the platform-provided token during formal platform submission; do not invent a production token.
+The challenge response is read from the Worker runtime variable `OPENAI_APPS_CHALLENGE`. Do not write the production token into source code, tests, logs, or Git.
 
 ## Frozen Tools
 

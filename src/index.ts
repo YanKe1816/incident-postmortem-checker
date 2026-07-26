@@ -6,11 +6,14 @@ import termsPageHtml from "./pages/terms.html";
 const SERVICE_NAME = "incident-postmortem-checker";
 const VERSION = "1.0.0";
 const PROTOCOL_VERSION = "2024-11-05";
-const CHALLENGE_TOKEN = "test";
 const HTML_HEADERS = { "content-type": "text/html; charset=utf-8" };
+const PLAIN_TEXT_HEADERS = { "content-type": "text/plain; charset=UTF-8" };
 
 type JsonRpcId = string | number | null;
 type JsonObject = Record<string, unknown>;
+type Env = {
+  OPENAI_APPS_CHALLENGE?: string;
+};
 type ToolName =
   | "extract_incident_timeline"
   | "extract_postmortem_actions"
@@ -620,7 +623,7 @@ async function handleMcp(request: Request): Promise<Response> {
 }
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/") {
       return new Response(homePageHtml, { headers: HTML_HEADERS });
@@ -635,7 +638,11 @@ export default {
       return new Response(supportPageHtml, { headers: HTML_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/.well-known/openai-apps-challenge") {
-      return new Response(CHALLENGE_TOKEN, { headers: { "content-type": "text/plain; charset=utf-8" } });
+      const challenge = env.OPENAI_APPS_CHALLENGE;
+      if (!challenge) {
+        return new Response("Challenge token is not configured", { status: 500, headers: PLAIN_TEXT_HEADERS });
+      }
+      return new Response(challenge, { headers: PLAIN_TEXT_HEADERS });
     }
     if (request.method === "GET" && url.pathname === "/health") {
       return jsonResponse({ status: "ok", service: SERVICE_NAME, version: VERSION });
